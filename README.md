@@ -9,4 +9,14 @@ Simple Pong game built using Python and Pygame.
    ```bash
    git clone https://github.com/your-username/repository-name.git
 
+## Controls
+W: Move the player's paddle up.
+
+S: Move the player's paddle down.
+
+P: Pause the game.
+
+ESC: Quit the game.
+
+
 ***ENJOY!*** 
