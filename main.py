@@ -2,6 +2,7 @@
 import pygame
 from menu import show_menu
 from game import game_loop
+from power_up import PowerUp
 
 # Initialize game
 pygame.init()
