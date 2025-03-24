@@ -2,6 +2,8 @@
 import pygame
 from utils import pause_game
 
+BALL_SIZE = 10 #size of the ball
+
 def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font):
     clock = pygame.time.Clock()
     running = True
@@ -43,16 +45,40 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font)
             ball_speed_y *= -1
 
         # Ball collision with paddles
-        if ball.colliderect(player) or ball.colliderect(opponent):
-            ball_speed_x *= -1
+        if ball.colliderect(player):
+            ball_speed_x = abs (ball_speed_x) # Ensure the ball moves to the right
+            #Influences ball's vertical speed basede on where it hits the paddle
+            ball_speed_y += (ball.centery - player.centery) // 10 # Adjust sppeed proportionally
+            # Limit ball's vertical speed
+            if ball_speed_y > 15:
+                ball_speed_y = 15
+            elif ball_speed_y < -15:
+                ball_speed_y = -15
+
+        if ball.colliderect(opponent):
+            ball_speed_x = -abs(ball_speed_x) # Ensure the ball moves to the left
+            #Influences ball's vertical speed basede on where it hits the paddle
+            ball_speed_y += (ball.centery - opponent.centery) // 10 # Adjust sppeed proportionally
+            # Limit ball's vertical speed
+            if ball_speed_y > 15:
+                ball_speed_y = 15
+            elif ball_speed_y < -15:
+                ball_speed_y = -15
 
         # Scoring
-        if ball.left <= 0:
+        if ball.left <= 0: # Opponent scores
             opponent_score += 1
-            ball.center = (WIDTH // 2, HEIGHT // 2)
-        if ball.right >= WIDTH:
+            display_message(WINDOW, WIDTH, HEIGHT, "Opponent Scores!", font, WHITE) # Show Message
+            pygame.time.delay(1000) # Pause for 3 seconds
+            ball.center = (player.right + BALL_SIZE, player.centery) 
+            ball_speed_x = abs(ball_speed_x)
+
+        if ball.right >= WIDTH: # Player scores
             player_score += 1
-            ball.center = (WIDTH // 2, HEIGHT // 2)
+            display_message(WINDOW, WIDTH, HEIGHT, "Player Scores!", font, WHITE) # Show Message
+            pygame.time.delay(1000) # Pause for 3 seconds
+            ball.center = (opponent.left - BALL_SIZE, opponent.centery)
+            ball_speed_x = -abs(ball_speed_x)
 
         # Drawing
         WINDOW.fill(BLACK)
@@ -70,3 +96,8 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font)
         # Update Display
         pygame.display.flip()
         clock.tick(60)  # 60 FPS
+
+def display_message(WINDOW, WIDTH, HEIGHT, message, font, WHITE):
+    text = font.render(message, True, WHITE)
+    WINDOW.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+    pygame.display.flip()
