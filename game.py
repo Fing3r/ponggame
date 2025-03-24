@@ -6,13 +6,15 @@ from power_up import PowerUp
 
 BALL_SIZE = 10 #size of the ball
 
-def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font):
+def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font, PADDLE_HEIGHT):
     clock = pygame.time.Clock()
     running = True
     player_score = 0
     opponent_score = 0
     ball_speed_x = 8
     ball_speed_y = 8
+    paddle_speed = 10 # Default paddle speed
+    opponent_frozen = False # Flag to freeze opponent's paddle
 
     # Initialize Power-Up
     power_up = PowerUp(WIDTH, HEIGHT)
@@ -40,6 +42,14 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font)
             elif power_up.type == "slow":
                 ball_speed_x *= 0.5  # Decrease ball speed
                 ball_speed_y *= 0.5
+            elif power_up.type == "paddle_increase":
+                player.height += 100  # Increase player's paddle size
+            elif power_up.type == "paddle_decrease":
+                opponent.height = max(50, opponent.height - 50)  # Decrease opponent's paddle size (minimum height: 50)
+            elif power_up.type == "paddle_speed":
+                paddle_speed = 90  # Temporarily increase paddle speed
+            elif power_up.type == "freeze_opponent":
+                opponent_frozen = True  # Freeze opponent's paddle
 
             power_up.start_time = pygame.time.get_ticks()  # Start the power-up effect timer
             power_up.active = False  # Deactivate the power-up
@@ -55,21 +65,30 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font)
                 elif power_up.type == "slow":
                     ball_speed_x /= 0.5
                     ball_speed_y /= 0.5
+                elif power_up.type == "paddle_increase":
+                    player.height = PADDLE_HEIGHT  # Reset player's paddle size
+                elif power_up.type == "paddle_decrease":
+                    opponent.height = PADDLE_HEIGHT  # Reset opponent's paddle size
+                elif power_up.type == "paddle_speed":
+                    paddle_speed = 10  # Reset paddle speed to default
+                elif power_up.type == "freeze_opponent":
+                    opponent_frozen = False  # Unfreeze opponent's paddle
 
-                power_up.start_time = None  # Reset the start time
+                power_up.start_time = None  # Reset timer
         
         # Player movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w] and player.top > 0:
-            player.y -= 10
+            player.y -= paddle_speed  # Use variable paddle speed
         if keys[pygame.K_s] and player.bottom < HEIGHT:
-            player.y += 10
+            player.y += paddle_speed  # Use variable paddle speed
 
         # Opponent AI movement (simple: follows ball)
-        if opponent.centery < ball.centery and opponent.bottom < HEIGHT:
-            opponent.y += 10
-        if opponent.centery > ball.centery and opponent.top > 0:
-            opponent.y -= 10
+        if not opponent_frozen:  # Only move if not frozen
+            if opponent.centery < ball.centery and opponent.bottom < HEIGHT:
+                opponent.y += 10
+            if opponent.centery > ball.centery and opponent.top > 0:
+                opponent.y -= 10
 
         # Ball movement
         ball.x += ball_speed_x

@@ -29,7 +29,7 @@ font = pygame.font.Font(None, 36)
 # Main loop
 while True:
     show_menu(WINDOW, WIDTH, HEIGHT, WHITE, BLACK) # Main Menu
-    game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font) # Start Game
+    game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font, PADDLE_HEIGHT) # Start Game
 
 # Quit game
 pygame.quit()
