@@ -39,6 +39,11 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font,
             if power_up.type == "speed":
                 ball_speed_x *= 1.5  # Increase ball speed
                 ball_speed_y *= 1.5
+                # Cap the ball's speed to prevent it from becoming unmanageable
+                if abs(ball_speed_x) > 20:
+                    ball_speed_x = 20 if ball_speed_x > 0 else -20
+                if abs(ball_speed_y) > 20:
+                    ball_speed_y = 20 if ball_speed_y > 0 else -20
             elif power_up.type == "slow":
                 ball_speed_x *= 0.5  # Decrease ball speed
                 ball_speed_y *= 0.5
@@ -50,7 +55,7 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font,
                 paddle_speed = 90  # Temporarily increase paddle speed
             elif power_up.type == "freeze_opponent":
                 opponent_frozen = True  # Freeze opponent's paddle
-
+        
             power_up.start_time = pygame.time.get_ticks()  # Start the power-up effect timer
             power_up.active = False  # Deactivate the power-up
 
@@ -93,10 +98,15 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font,
         # Ball movement
         ball.x += ball_speed_x
         ball.y += ball_speed_y
-
-        # Ball collision with top and bottom
-        if ball.top <= 0 or ball.bottom >= HEIGHT:
+   
+        # Ball collision with top and bottom walls
+        if ball.top + ball_speed_y <= 0:  # Ball hits the top wall
             ball_speed_y *= -1
+            ball.top = 0  # Correct the position to prevent overlap
+        
+        if ball.bottom + ball_speed_y >= HEIGHT:  # Ball hits the bottom wall
+            ball_speed_y *= -1
+            ball.bottom = HEIGHT  # Correct the position to prevent overlap
 
         # Ball collision with paddles
         if ball.colliderect(player):
@@ -121,23 +131,7 @@ def game_loop(WINDOW, WIDTH, HEIGHT, WHITE, BLACK, player, opponent, ball, font,
             if ball_speed_y > 15:
                 ball_speed_y = 15
             elif ball_speed_y < -15:
-                ball_speed_y = -15
-
-         # Power-Up Collision
-        if power_up.active and ball.colliderect(power_up.rect):
-            if power_up.type == "speed":
-                ball_speed_x *= 1.2  # Increase ball speed
-                ball_speed_y *= 1.2
-                # Cap the ball's speed to prevent it from becoming unmanageable
-                if abs(ball_speed_x) > 20:
-                    ball_speed_x = 20 if ball_speed_x > 0 else -20
-                if abs(ball_speed_y) > 20:
-                    ball_speed_y = 20 if ball_speed_y > 0 else -20
-            elif power_up.type == "slow":
-                ball_speed_x *= 0.5  # Decrease ball speed
-                ball_speed_y *= 0.5
-        
-            power_up.active = False  # Deactivate the power-up       
+                ball_speed_y = -15   
 
         # Scoring
         if ball.left <= 0:  # Opponent scores
